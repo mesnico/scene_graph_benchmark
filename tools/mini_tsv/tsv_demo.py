@@ -4,6 +4,9 @@ import os.path as op
 import json
 import cv2
 import base64
+from shutil import copyfile
+import argparse
+import tqdm
 
 from maskrcnn_benchmark.structures.tsv_file_ops import tsv_reader, tsv_writer
 from maskrcnn_benchmark.structures.tsv_file_ops import generate_linelist_file
@@ -12,17 +15,31 @@ from maskrcnn_benchmark.structures.tsv_file import TSVFile
 from maskrcnn_benchmark.data.datasets.utils.image_ops import img_from_base64
 
 # To generate a tsv file:
-data_path = "tools/mini_tsv/images/"
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset_path', default=None,
+                        help='Destination folder (created if not existing)')
+parser.add_argument('--image_path', default=None,
+                        help='Path to image folder')
+opt = parser.parse_args()
+print(opt)
+
+dataset_path = opt.dataset_path #"/home/nicola/scene_graph_test_dataset"
+data_path = opt.image_path # dataset_path+"/images/"
 img_list = os.listdir(data_path)
-tsv_file = "tools/mini_tsv/data/train.tsv"
-label_file = "tools/mini_tsv/data/train.label.tsv"
-hw_file = "tools/mini_tsv/data/train.hw.tsv"
-linelist_file = "tools/mini_tsv/data/train.linelist.tsv"
+tsv_file = dataset_path+"/train.tsv"
+label_file = dataset_path+"/train.label.tsv"
+hw_file = dataset_path+"/train.hw.tsv"
+linelist_file = dataset_path+"/train.linelist.tsv"
+
+if not op.exists(dataset_path):
+   os.makedirs(dataset_path)
+copyfile("tools/mini_tsv/data/train.yaml", dataset_path+"/train.yaml")
+copyfile("tools/mini_tsv/data/VG-SGG-dicts-vgoi6-clipped.json", dataset_path+"/VG-SGG-dicts-vgoi6-clipped.json")
 
 rows = []
 rows_label = []
 rows_hw = []
-for img_p in img_list:
+for img_p in tqdm.tqdm(img_list):
     img_key = img_p.split('.')[0]
     img_path = op.join(data_path, img_p)
     img = cv2.imread(img_path)
@@ -55,7 +72,7 @@ tsv_writer(rows_hw, hw_file)
 # generate linelist file
 generate_linelist_file(label_file, save_file=linelist_file)
 
-
+'''
 # To access a tsv file:
 # 1) Use tsv_reader to read dataset in given order
 rows = tsv_reader("tools/mini_tsv/data/train.tsv")
@@ -70,6 +87,6 @@ tsv = TSVFile("tools/mini_tsv/data/train.tsv")
 row = tsv.seek(1) # to access the second row 
 img_key = row[0]
 img = img_from_base64(row[1])
-
+'''
 
 

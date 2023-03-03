@@ -1,6 +1,6 @@
 img: train.tsv
-label: train.label.tsv
+# label: train.label.tsv
 hw: train.hw.tsv
-labelmap: train.labelmap.tsv
+labelmap: VG-SGG-dicts-vgoi6-clipped.json
 linelist: train.linelist.tsv
 
